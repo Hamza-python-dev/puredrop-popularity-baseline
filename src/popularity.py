@@ -1,4 +1,4 @@
-"""Popularity baseline for PureDrop Dairy.
+﻿"""Popularity baseline for PureDrop Dairy.
 
 Popularity = how many DELIVERED order lines a product has.
 One row in interactions.csv = one product on one customer's delivery on one date.
@@ -23,6 +23,8 @@ def load_interactions(path):
         return pd.read_csv(path)
     except pd.errors.EmptyDataError:
         raise ValueError(f"{path} is empty - nothing to count.")
+    except ValueError as err:
+        raise ValueError(f"{path} is not a valid CSV file: {err}")
 
 
 def top_products(df, k=5):
@@ -39,6 +41,8 @@ def top_products(df, k=5):
     delivered = df.loc[status == "delivered"].dropna(subset=["product_id"])
     if delivered.empty:
         raise ValueError("No delivered orders found - nothing to rank.")
+    if pd.to_numeric(delivered["product_id"], errors="coerce").isna().any():
+        raise ValueError("product_id must contain only numbers.")
 
     counts = delivered.groupby("product_id").size().reset_index(name="orders")
     counts = counts.sort_values(["orders", "product_id"], ascending=[False, True]).head(k)  # ties: lower id first
@@ -55,6 +59,9 @@ def main(argv=None):
         print(top_products(load_interactions(args.data), args.k).to_string(index=False))
     except (ValueError, FileNotFoundError) as err:
         print(f"Error: {err}", file=sys.stderr)
+        return 1
+    except Exception as err:
+        print(f"Unexpected error: {err}", file=sys.stderr)
         return 1
     return 0
 
