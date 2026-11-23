@@ -25,7 +25,7 @@ pip install -r requirements.txt
 python src/popularity.py --data data/interactions.csv --k 5
 ```
 
-Output on the full Task 1 data (614 rows):
+Output on the full Task 1 data (614 rows in total, 587 of them delivered):
 ```
  rank  product_id  orders
     1           1     233
@@ -52,7 +52,7 @@ Expected result: `11 passed`.
 
 | Data | Rows | Load | Ranking (avg of 200 runs) |
 |---|---|---|---|
-| Full Task 1 file | 614 | 2.8 ms | 3.2 ms |
+| Full Task 1 file | 614 (587 delivered) | 2.8 ms | 3.2 ms |
 
 Ranking the whole file takes about 3 ms, so speed is not a concern at this size.
 
