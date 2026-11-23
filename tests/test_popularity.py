@@ -64,3 +64,23 @@ def test_product_with_zero_delivered_rows_is_left_out():
                        "status": ["delivered", "delivered", "delivered", "skipped"]})
     result = top_products(df, k=5)
     assert list(result["product_id"]) == [1, 2]
+
+def test_tie_lower_product_id_ranks_first():
+    df = pd.DataFrame({"product_id": [5, 5, 2, 2, 9], "status": ["delivered"] * 5})
+    result = top_products(df, k=3)
+    assert list(result["product_id"]) == [2, 5, 9]
+    assert list(result["orders"]) == [2, 2, 1]
+
+
+def test_cli_malformed_csv_gives_clear_message(tmp_path, capsys):
+    bad = tmp_path / "bad.csv"
+    bad.write_text('product_id,status\n1,"delivered\n')
+    assert main(["--data", str(bad)]) == 1
+    assert "not a valid CSV" in capsys.readouterr().err
+
+
+def test_cli_text_product_id_gives_clear_message(tmp_path, capsys):
+    f = tmp_path / "text.csv"
+    f.write_text("product_id,status\nmilk,delivered\n1,delivered\n")
+    assert main(["--data", str(f)]) == 1
+    assert "product_id must contain only numbers" in capsys.readouterr().err
